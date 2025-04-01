@@ -56,12 +56,10 @@ func (us *UserStorage) Update(ctx context.Context, in *storage.UpdateUserDto) (r
 		isUpdateNeeded = true
 	}
 
-	if !isUpdateNeeded {
-		log.Debug("no updates needed")
-		return nil, nil
+	if isUpdateNeeded {
+		builder = builder.Set("updated_at", squirrel.Expr("NOW()"))
 	}
 
-	builder = builder.Set("updated_at", squirrel.Expr("NOW()"))
 	builder = builder.Suffix("RETURNING id, first_name, last_name, email, created_at, updated_at")
 
 	query, args, err := builder.ToSql()

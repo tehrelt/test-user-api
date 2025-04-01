@@ -33,7 +33,7 @@ func CreateUser(userService *userservice.UserService) echo.HandlerFunc {
 
 		var req request
 		if err := c.Bind(&req); err != nil {
-			l.Error("failed to bind request", err)
+			l.Error("failed to bind request", slog.String("err", err.Error()))
 			return badrequest("failed validation of request")
 		}
 

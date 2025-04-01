@@ -2,11 +2,12 @@ package userstorage
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"github.com/tehrelt/test-users-api/internal/common"
 	"github.com/tehrelt/test-users-api/internal/models"
 	"github.com/tehrelt/test-users-api/internal/storage"
@@ -17,7 +18,7 @@ func (us *UserStorage) Find(ctx context.Context, id uuid.UUID) (*models.User, er
 	fn := "userstorage.Find"
 
 	log, ok := common.ExtractLogger(ctx)
-	if ok {
+	if !ok {
 		log = slog.Default()
 	}
 
@@ -27,6 +28,7 @@ func (us *UserStorage) Find(ctx context.Context, id uuid.UUID) (*models.User, er
 	query, args, err := squirrel.Select("id", "last_name", "first_name", "email", "created_at", "updated_at").
 		From("users").
 		Where(squirrel.Eq{"id": id.String()}).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 
 	if err != nil {
@@ -37,7 +39,7 @@ func (us *UserStorage) Find(ctx context.Context, id uuid.UUID) (*models.User, er
 	user := new(userEntry)
 	if err := us.pool.QueryRow(ctx, query, args...).
 		Scan(&user.id, &user.lastName, &user.firstName, &user.email, &user.createdAt, &user.updatedAt); err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			log.Debug("user not found", slog.String("id", id.String()))
 			return nil, storage.ErrUserNotFound
 		}

@@ -26,6 +26,7 @@ func (s *UserService) Update(ctx context.Context, in *service.UpdateUserDto) (*m
 		Id:        in.Id,
 		FirstName: in.FirstName,
 		LastName:  in.LastName,
+		Email:     in.Email,
 	})
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {

@@ -26,7 +26,7 @@ type Config struct {
 
 	Http struct {
 		Host string `env:"HTTP_HOST"`
-		Port string `env:"HTTP_PORT"`
+		Port int    `env:"HTTP_PORT"`
 	}
 
 	Pg struct {

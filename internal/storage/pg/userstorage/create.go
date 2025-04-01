@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgconn"
 	"github.com/tehrelt/test-users-api/internal/common"
 	"github.com/tehrelt/test-users-api/internal/models"
 	"github.com/tehrelt/test-users-api/internal/storage"
@@ -53,7 +53,7 @@ func (us *UserStorage) Create(ctx context.Context, in *storage.CreateUserDto) (u
 
 	if err = tx.QueryRow(ctx, query, args...).
 		Scan(&u.id, &u.lastName, &u.firstName, &u.email, &u.createdAt, &u.updatedAt); err != nil {
-		var pgErr pgx.PgError
+		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
 				log.Warn("user already exists")

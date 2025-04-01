@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/tehrelt/test-users-api/internal/common"
@@ -10,7 +11,7 @@ import (
 	"github.com/tehrelt/test-users-api/internal/storage"
 )
 
-func (service *UserService) Create(ctx context.Context, in *service.CreateUserDto) (*models.User, error) {
+func (serv *UserService) Create(ctx context.Context, in *service.CreateUserDto) (*models.User, error) {
 
 	fn := "userservice.Create"
 	l, ok := common.ExtractLogger(ctx)
@@ -26,8 +27,14 @@ func (service *UserService) Create(ctx context.Context, in *service.CreateUserDt
 	}
 
 	l.Info("creating user")
-	user, err := service.saver.Create(ctx, newUser)
+	user, err := serv.saver.Create(ctx, newUser)
 	if err != nil {
+		if errors.Is(err, storage.ErrUserAlreadyExists) {
+			l.Info("user already exists")
+			return nil, service.ErrUserAlreadyExists
+		}
+
+		l.Error("failed to create user", slog.String("err", err.Error()))
 		return nil, err
 	}
 
