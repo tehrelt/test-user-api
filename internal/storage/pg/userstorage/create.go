@@ -45,12 +45,13 @@ func (us *UserStorage) Create(ctx context.Context, in *storage.CreateUserDto) (u
 	defer func() {
 		if err != nil {
 			_ = tx.Rollback(ctx)
+			return
 		}
 
 		_ = tx.Commit(ctx)
 	}()
 
-	if err = us.pool.QueryRow(ctx, query, args...).
+	if err = tx.QueryRow(ctx, query, args...).
 		Scan(&u.id, &u.lastName, &u.firstName, &u.email, &u.createdAt, &u.updatedAt); err != nil {
 		var pgErr pgx.PgError
 		if errors.As(err, &pgErr) {
