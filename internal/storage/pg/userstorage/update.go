@@ -2,9 +2,11 @@ package userstorage
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx"
 	"github.com/tehrelt/test-users-api/internal/common"
 	"github.com/tehrelt/test-users-api/internal/models"
 	"github.com/tehrelt/test-users-api/internal/storage"
@@ -23,6 +25,7 @@ func (us *UserStorage) Update(ctx context.Context, in *storage.UpdateUserDto) (r
 
 	log.Debug("updating user", slog.Any("in", in))
 	builder := squirrel.Update(pg.USERS_TABLE).Where(squirrel.Eq{"id": in.Id.String()}).PlaceholderFormat(squirrel.Dollar)
+	isUpdateNeeded := false
 
 	tx, err := us.pool.Begin(ctx)
 	if err != nil {
@@ -40,15 +43,26 @@ func (us *UserStorage) Update(ctx context.Context, in *storage.UpdateUserDto) (r
 
 	if in.FirstName != nil {
 		builder = builder.Set("first_name", *in.FirstName)
+		isUpdateNeeded = true
 	}
 
 	if in.LastName != nil {
 		builder = builder.Set("last_name", *in.LastName)
+		isUpdateNeeded = true
 	}
 
 	if in.Email != nil {
 		builder = builder.Set("email", *in.Email)
+		isUpdateNeeded = true
 	}
+
+	if !isUpdateNeeded {
+		log.Debug("no updates needed")
+		return nil, nil
+	}
+
+	builder = builder.Set("updated_at", squirrel.Expr("NOW()"))
+	builder = builder.Suffix("RETURNING id, first_name, last_name, email, created_at, updated_at")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -60,6 +74,10 @@ func (us *UserStorage) Update(ctx context.Context, in *storage.UpdateUserDto) (r
 	if err := tx.
 		QueryRow(ctx, query, args...).
 		Scan(&u.id, &u.firstName, &u.lastName, &u.email, &u.createdAt, &u.updatedAt); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("user not found", slog.Any("err", err))
+			return nil, storage.ErrUserNotFound
+		}
 
 		log.Error("failed to update user", slog.Any("err", err))
 		return nil, err
