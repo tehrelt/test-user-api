@@ -26,6 +26,7 @@ require (
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/google/uuid v1.6.0
+	github.com/google/wire v0.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/labstack/gommon v0.4.2 // indirect

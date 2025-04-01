@@ -31,9 +31,10 @@ type Config struct {
 
 	Pg struct {
 		Host     string `env:"PG_HOST"`
-		Port     string `env:"PG_PORT"`
+		Port     int    `env:"PG_PORT"`
 		Username string `env:"PG_USER"`
 		Password string `env:"PG_PASS"`
+		Name     string `env:"PG_NAME"`
 	}
 }
 

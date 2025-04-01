@@ -22,7 +22,7 @@ type UserService struct {
 	provider UserProvider
 }
 
-func NewUserService(saver UserSaver, provider UserProvider) *UserService {
+func New(saver UserSaver, provider UserProvider) *UserService {
 	return &UserService{
 		saver:    saver,
 		provider: provider,

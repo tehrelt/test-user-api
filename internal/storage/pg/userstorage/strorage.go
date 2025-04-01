@@ -36,7 +36,7 @@ func (u *userEntry) toModel() (*models.User, error) {
 	}, nil
 }
 
-func NewUserStorage(pool *pgxpool.Pool) *UserStorage {
+func New(pool *pgxpool.Pool) *UserStorage {
 	return &UserStorage{
 		pool: pool,
 	}

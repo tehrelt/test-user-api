@@ -17,11 +17,12 @@ type Server struct {
 	userService *userservice.UserService
 }
 
-func NewServer(cfg *config.Config) *Server {
+func New(cfg *config.Config, userService *userservice.UserService) *Server {
 
 	s := &Server{
-		cfg:    cfg,
-		router: echo.New(),
+		cfg:         cfg,
+		router:      echo.New(),
+		userService: userService,
 	}
 
 	s.setup()
