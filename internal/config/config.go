@@ -19,6 +19,11 @@ const (
 type Config struct {
 	Env EnvType `env:"ENV"`
 
+	App struct {
+		Name    string `env:"APP_NAME"`
+		Version string `env:"APP_VERSION"`
+	}
+
 	Http struct {
 		Host string `env:"HTTP_HOST"`
 		Port string `env:"HTTP_PORT"`
@@ -36,7 +41,7 @@ func New() *Config {
 	config := new(Config)
 
 	if err := cleanenv.ReadEnv(config); err != nil {
-		slog.Error("error when reading env", slog.String("err", err))
+		slog.Error("error when reading env", slog.String("err", err.Error()))
 		header := fmt.Sprintf("%s - %s", os.Getenv("APP_NAME"), os.Getenv("APP_VERSION"))
 
 		usage := cleanenv.FUsage(os.Stdout, config, &header)
