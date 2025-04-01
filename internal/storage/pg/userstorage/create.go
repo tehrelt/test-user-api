@@ -19,8 +19,9 @@ func (us *UserStorage) Create(ctx context.Context, in *storage.CreateUserDto) (u
 
 	log, ok := common.ExtractLogger(ctx)
 	if !ok {
-		log = slog.With(slog.String("fn", fn))
+		log = slog.Default()
 	}
+	log = log.With(slog.String("fn", fn))
 
 	log.Debug("creating user", slog.Any("in", in))
 
